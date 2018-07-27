@@ -131,7 +131,7 @@ export class TodoApp {
 - only framework implementing the eventual immutability API (!)
 - support of [Directed Acyclic Graphs][DAG]
 - actions as pure functions (cf. [TodoMVC](src/samples/todo.ts) example)
-- easily observable data (cf. watch())
+- easily observable data (cf. [watch()](wiki))
 - memoized computed properties (cf. @computed)
 - no need for code pre-processor - fully based on JS decorators
 - List and Dictionary collection support (cf. hList() and hDictionary())

@@ -118,7 +118,7 @@ export let string = stProperty(""),
  * @param propName the property name
  * @param descriptor the property descriptor
  */
-export function computedDecorator(proto, propName: string, descriptor: PropertyDescriptor) {
+function computedDecorator(proto, propName: string, descriptor: PropertyDescriptor) {
 
     // we must wrap the getter with a new getter that will ensure the memoization
     let processor: Function = descriptor.get!, $$propName = "$$" + propName;
@@ -191,7 +191,7 @@ export function computed() {
  * Tell if a mutation is ongoing on a given data node
  * @param o the data node to assert
  */
-export function isMutating(o) {
+export function isMutating(o): boolean {
     return o ? o.$mn !== undefined : false;
 }
 
@@ -199,7 +199,7 @@ export function isMutating(o) {
  * Tell if a dataset instance has become immutable
  * @param o the data node to assert
  */
-export function isImmutable(o) {
+export function isImmutable(o): boolean {
     return o.$next !== undefined;
 }
 
@@ -729,7 +729,7 @@ function disconnectChildFromParent(parent: DataNode, child: DataNode | null) {
  * @param parent 
  * @param child 
  */
-export function connectChildToParent(parent: DataNode, child: DataNode | null) {
+function connectChildToParent(parent: DataNode, child: DataNode | null) {
     if (child) {
         child = lastVersion(child);
         let dmd = retrieveDmd(child, "connectChildToParent");
