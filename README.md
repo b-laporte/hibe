@@ -6,18 +6,22 @@
 ## Key features
 - eventual immutability API concept (cf. below)
 - support of [Directed Acyclic Graphs][DAG]
-- actions as pure functions (cf. [TodoMVC](src/samples/todo.ts) example)
-- easily observable data (cf. [watch()](../../wiki))
-- memoized computed properties (cf. @computed)
+- actions as pure functions (cf. [TodoMVC](src/samples/todomvc/todo.ts) example)
+- easily observable data (cf. [watch()][wiki])
+- memoized computed properties (cf. [@computed][decorators])
 - no need for code pre-processor - fully based on JS decorators
-- List and Dictionary collection support (cf. hList() and hDictionary())
-- possibility to store any JavaScript object (cf. @object) - only root reference will be watched
-- possibility to create datasets from a JSON structure (cf. create()) - note: load will be lazy (i.e. objects will be loaded on read)
-- possibility to convert datasets to JS objects (cf. convert2JS())
+- List and Dictionary collection support (cf. [hList()][collections] and [hDictionary()][collections])
+- possibility to store any JavaScript object (cf. [@object][decorators]) - only root reference will be watched
+- possibility to create datasets from a JSON structure (cf. [create()][toFromJS]) - note: load will be lazy (i.e. objects will be loaded on read)
+- possibility to convert datasets to JS objects (cf. [convert2JS()][toFromJS])
 - fully tree-shakeable (what you don't use will be stripped-out from your code - cf. [rollup](https://rollupjs.org/guide/en) or [webpack](https://webpack.js.org/guides/tree-shaking/))
-- easily testable (cf. mutationComplete())
+- easily testable (cf. [mutationComplete()][wiki])
 - support of data object inheritance
 
+[wiki]: ../../wiki
+[decorators]: ../../wiki/Decorators
+[collections]: ../../wiki/Collections
+[toFromJS]: ../../wiki/To-&--From-JS
 
 ## Core concept
 
