@@ -3,6 +3,22 @@
 
 **tl;dr** hibe is library to create immutable data objects through a 'mutable' api
 
+## Key features
+- eventual immutability API concept (cf. below)
+- support of [Directed Acyclic Graphs][DAG]
+- actions as pure functions (cf. [TodoMVC](src/samples/todo.ts) example)
+- easily observable data (cf. [watch()](../../wiki))
+- memoized computed properties (cf. @computed)
+- no need for code pre-processor - fully based on JS decorators
+- List and Dictionary collection support (cf. hList() and hDictionary())
+- possibility to store any JavaScript object (cf. @object) - only root reference will be watched
+- possibility to create datasets from a JSON structure (cf. create()) - note: load will be lazy (i.e. objects will be loaded on read)
+- possibility to convert datasets to JS objects (cf. convert2JS())
+- fully tree-shakeable (what you don't use will be stripped-out from your code - cf. [rollup](https://rollupjs.org/guide/en) or [webpack](https://webpack.js.org/guides/tree-shaking/))
+- easily testable (cf. mutationComplete())
+- support of data object inheritance
+
+
 ## Core concept
 
 Hibe has been primarily designed to work in uni-directional dataflow contexts (cf. [flux](https://facebook.github.io/flux/) or [redux](https://redux.js.org/basics/data-flow)). In this architecture, User Interface updates are triggered by state changes - and state changes are triggered through actions (in other words UI elements never refresh themselves directly).
@@ -126,22 +142,6 @@ export class TodoApp {
     }
 }
 ````
-
-## Key features
-- only framework implementing the eventual immutability API (!)
-- support of [Directed Acyclic Graphs][DAG]
-- actions as pure functions (cf. [TodoMVC](src/samples/todo.ts) example)
-- easily observable data (cf. [watch()](wiki))
-- memoized computed properties (cf. @computed)
-- no need for code pre-processor - fully based on JS decorators
-- List and Dictionary collection support (cf. hList() and hDictionary())
-- possibility to store any JavaScript object (cf. @object) - only root reference will be watched
-- possibility to create datasets from a JSON structure (cf. create()) - note: load will be lazy (i.e. objects will be loaded on read)
-- possibility to convert datasets to JS objects (cf. convert2JS())
-- fully tree-shakeable (what you don't use will be stripped-out from your code - cf. [rollup](https://rollupjs.org/guide/en) or [webpack](https://webpack.js.org/guides/tree-shaking/))
-- easily testable (cf. mutationComplete())
-- support of data object inheritance
-
 
 ## Using hibe
 
