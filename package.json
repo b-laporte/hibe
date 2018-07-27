@@ -1,0 +1,52 @@
+{
+  "name": "hibe",
+  "version": "0.0.0-SNAPSHOT",
+  "description": "Lightweight data framework implementing eventual immutability paradigm",
+  "keywords": [
+      "datastore",
+      "data",
+      "store",
+      "flux",
+      "immutability",
+      "immutableJS",
+      "watch"
+  ],
+  "repository": {
+    "type": "git"
+  },
+  "main": "dist/hibe.js",
+  "rollup-plugin-main": "dist/rollup-plugin-hibe.js",
+  "author": "Bertrand Laporte",
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "build-test": "rollup -c rollup.test.config.js",
+    "build": "yarn run clean && yarn run build-test",
+    "mocha": "mocha dist/test.js --reporter dot",
+    "test": "yarn run build && yarn run mocha",
+    "build-hive": "yarn run clean && rollup -c rollup.config.js"
+  },
+  "license": "Apache v2.0",
+  "private": true,
+  "bugs": {},
+  "devDependencies": {
+    "rollup": "^0.61.2",
+    "rollup-watch": "^4.3.1",
+    "rollup-plugin-typescript2": "^0.15.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-uglify": "^4.0.0",
+    "rollup-plugin-minify-es": "^1.1.1",
+    "rollup-plugin-gzip": "^1.3.0",
+    "uglify-es": "^3.3.9",
+    "typescript": ">=2.9.2",
+    "mocha": "^5.2.0",
+    "@types/node": "^10.3.5",
+    "@types/mocha": "^5.2.3"
+  },
+  "dependencies": {
+    "typescript": ">=2.9.2"
+  },
+  "engines": {
+    "node": ">=10.3.5"
+  }
+}
