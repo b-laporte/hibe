@@ -36,8 +36,9 @@ export class TodoApp {
 export function createTodo(app: TodoApp) {
     let todoDesc = app.newEntry.trim();
     if (todoDesc.length) {
-        let item = app.list.newItem();
+        let item = new Todo();
         item.description = todoDesc;
+        app.list.push(item);
     }
     app.newEntry = "";
 }
