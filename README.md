@@ -77,7 +77,7 @@ When the new version has spawn, the code will behave as follows:
 console.log(todo.description); // print "" -> value before mutation
 console.log(todo.completed);   // print false
 
-todo = lastVersion(todo);      // lastVersion is a hibe utility function
+todo = latestVersion(todo);    // latestVersion is a hibe utility function
 console.log(todo.description); // print "Call Marge" -> value after mutation
 console.log(todo.completed);   // print true
 ```

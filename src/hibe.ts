@@ -243,7 +243,7 @@ let MAX_ITERATION = 10000;
  * Return the last version of a data node instance
  * @param dataNode 
  */
-export function lastVersion<T>(dataNode: T): T {
+export function latestVersion<T>(dataNode: T): T {
     let d: any = dataNode;
     // fast case first
     if (!d || !d.$next) return d;
@@ -312,7 +312,7 @@ function get<T>(obj: DataNode, $$propName, propName: string, cf?: Constructor<T>
                 }
                 // as object is immutable and as value has never been set on this object
                 // we get the value from the last version
-                target = lastVersion(target);
+                target = latestVersion(target);
             }
             target = target.$mn || target;
 
@@ -437,7 +437,7 @@ function set(obj: DataNode, $$propName: string | number, newValue: any, isDataNo
  * @return the watch function that can be used as identifier to un-watch the object (cf. unwatch)
  */
 export function watch(d: any, fn: (any) => void): ((any) => void) {
-    d = lastVersion(d);
+    d = latestVersion(d);
     let dmd = retrieveDmd(d, "watch");
     if (dmd) {
         if (!dmd.watchers) {
@@ -455,7 +455,7 @@ export function watch(d: any, fn: (any) => void): ((any) => void) {
  * @param watchFn the watch function that should not be called any longer (returned by watch(...))
  */
 export function unwatch(d: any, watchFn: ((any) => void) | null) {
-    d = lastVersion(d);
+    d = latestVersion(d);
     if (d.$dmd && watchFn) {
         let w = d.$dmd.watchers;
         if (w) {
@@ -709,7 +709,7 @@ function updateSubDataNodeRef(dataNode: DataNode, currentChild: DataNode | null,
 function disconnectChildFromParent(parent: DataNode, child: DataNode | null) {
     if (child) {
         // if child is immutable, it last version still holds the reference to the current parent
-        child = lastVersion(child);
+        child = latestVersion(child);
         let dmd = retrieveDmd(child, "disconnectChildFromParent");
         if (dmd) {
             let p = dmd.parents, idx = p.indexOf(parent);
@@ -731,7 +731,7 @@ function disconnectChildFromParent(parent: DataNode, child: DataNode | null) {
  */
 function connectChildToParent(parent: DataNode, child: DataNode | null) {
     if (child) {
-        child = lastVersion(child);
+        child = latestVersion(child);
         let dmd = retrieveDmd(child, "connectChildToParent");
         if (dmd) {
             dmd.parents.push(parent); // note parent can be referenced multiple times if there are multiple links
@@ -1405,7 +1405,7 @@ class RefreshContext {
         if (rn.ctxt !== this) {
             return;
         }
-        let dn = rn.dataNode!.$next || rn.dataNode, dmd = dn!.$dmd!; // lastVersion(rn.dataNode)
+        let dn = rn.dataNode!.$next || rn.dataNode, dmd = dn!.$dmd!; // latestVersion(rn.dataNode)
         dmd.refreshNode = undefined;
         // warning: refreshDependencies may be > 0 when node is removed from list when a child takes precedence
         rn.dataNode = undefined;

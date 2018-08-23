@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TestNode, DictTestNode } from "./testnodes";
-import { hDictionary, isMutating, mutationComplete, lastVersion } from '../hibe';
+import { hDictionary, isMutating, mutationComplete, latestVersion } from '../hibe';
 
 describe('Dictionaries', () => {
 
@@ -127,7 +127,7 @@ describe('Dictionaries', () => {
 
         dn = await mutationComplete(dn);
 
-        let nda2 = lastVersion(nda);
+        let nda2 = latestVersion(nda);
         assert.equal(dn.dict.size, 2, "2 items (2)");
         assert.equal(nda2, dn.dict.get("a"), "nda correctly updated");
 

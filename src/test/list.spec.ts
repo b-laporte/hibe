@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import { TestNode, ArrTestNode, initNewArrTestNode } from "./testnodes";
-import { isMutating, mutationComplete, lastVersion, hList } from '../hibe';
+import { isMutating, mutationComplete, latestVersion, hList } from '../hibe';
 
 describe('Lists', () => {
 
@@ -176,7 +176,7 @@ describe('Lists', () => {
         let node12 = await mutationComplete(node11);
         assert.equal(stringifyList(node11.list), "i1-i2-null-i4", "node11.list original content");
         assert.equal(stringifyList(node12.list), "i1-i4", "node12.list new content");
-        assert.equal(lastVersion(node11.list), node12.list, "lastVersion of node11.list is node12.list");
+        assert.equal(latestVersion(node11.list), node12.list, "latestVersion of node11.list is node12.list");
 
         node12.list.splice(1, 0, new TestNode()); // insert a new item
         let node13 = await mutationComplete(node12);

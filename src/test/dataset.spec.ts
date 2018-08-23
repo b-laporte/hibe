@@ -1,7 +1,7 @@
 
 import * as assert from 'assert';
 import { TestNode, SimpleNode, SubTestNode, DsCustom, InitNode } from "./testnodes";
-import { isMutating, mutationComplete, isImmutable, lastVersion, create, isDataset, hList, hDictionary } from '../hibe';
+import { isMutating, mutationComplete, isImmutable, latestVersion, create, isDataset, hList, hDictionary } from '../hibe';
 
 describe('Datasets', () => {
 
@@ -31,7 +31,7 @@ describe('Datasets', () => {
         assert.equal(nd2.value, "v2", "old version holds old value");
         assert.equal(nd3.value, "v3", "new version holds new value");
         assert.equal(nd2["$next"], nd3, "nd3 is nd2.$next");
-        assert.equal(lastVersion(nd), nd3, "nd3 is last version of nd");
+        assert.equal(latestVersion(nd), nd3, "nd3 is last version of nd");
     });
 
     it('should tell if an object is immutable', async function () {
@@ -88,10 +88,10 @@ describe('Datasets', () => {
         let node13 = await mutationComplete(node12);
         assert.equal((node13 as any).$next, null, "no next 2");
         assert.equal(node12 !== node13, true, "new root node 13");
-        assert.equal(lastVersion(node12), node13, "new root node version");
+        assert.equal(latestVersion(node12), node13, "new root node version");
         assert.equal(node12.node, node21, "node12.node back to original value");
         assert.equal(node12.node !== node13.node, true, "new sub node version");
-        assert.equal(lastVersion(node12.node), node13.node, "new sub node version 2");
+        assert.equal(latestVersion(node12.node), node13.node, "new sub node version 2");
         assert.equal(node12.node ? node12.node.value : "x", "v1", "sub node reset");
         assert.equal(node13.node ? node13.node.value : "y", "abc", "new value in sub node");
 
@@ -102,8 +102,8 @@ describe('Datasets', () => {
         let node14 = await mutationComplete(node13);
         assert.equal(isMutating(node13), false, "node13 is pristine");
         assert.equal(node14.value, "node13", "node14 value");
-        assert.equal(lastVersion(node13), node14, "new root node version node14");
-        assert.equal(lastVersion(node13.node), node14.node, "new sub node version node14");
+        assert.equal(latestVersion(node13), node14, "new root node version node14");
+        assert.equal(latestVersion(node13.node), node14.node, "new sub node version node14");
         assert.equal(node14.node ? node14.node.value : "x", "node2x", "node14.node value");
     });
 
@@ -146,7 +146,7 @@ describe('Datasets', () => {
         node10.node = node20;
         let node11 = await mutationComplete(node10);
         assert.equal(isMutating(node11), false, "node11 is pristine");
-        assert.equal(node11.node, lastVersion(node20), "ref latest version of child");
+        assert.equal(node11.node, latestVersion(node20), "ref latest version of child");
     });
 
     it('should properly update child refs: null->sth (2)', async function () {
@@ -156,7 +156,7 @@ describe('Datasets', () => {
         node20.value = "v2";
         let node11 = await mutationComplete(node10);
         assert.equal(isMutating(node11), false, "node11 is pristine");
-        assert.equal(node11.node, lastVersion(node20), "ref latest version of child");
+        assert.equal(node11.node, latestVersion(node20), "ref latest version of child");
     });
 
     it('should properly update child refs: sth->sth', async function () {
@@ -184,7 +184,7 @@ describe('Datasets', () => {
         node20.value = "v2";
         node10.node2 = node20;
 
-        let node11 = await mutationComplete(node10), node21 = lastVersion(node20);
+        let node11 = await mutationComplete(node10), node21 = latestVersion(node20);
         assert.equal((node21 as any).$dmd!.parents.length, 1, "node21 has one parent");
         assert.equal((node21 as any).$dmd!.parents[0], node11, "node21 parent is node11");
         node11.node2 = null;
@@ -193,7 +193,7 @@ describe('Datasets', () => {
         assert.equal(node12, (node11 as any).$next, "node 12 is next node11");
         assert.equal(node12.node2, null, "node12 sub node has been removed");
 
-        assert.equal(lastVersion(node21), node21, "node21 didn't change");
+        assert.equal(latestVersion(node21), node21, "node21 didn't change");
         assert.equal((node21 as any).$dmd!.parents.length, 0, "node21 has no parents any more");
     });
 
@@ -202,7 +202,7 @@ describe('Datasets', () => {
         let node10 = new TestNode(), node20 = new TestNode();
         node10.node2 = node20;
         node20.value = "v2";
-        let node11 = await mutationComplete(node10), node21 = lastVersion(node20);
+        let node11 = await mutationComplete(node10), node21 = latestVersion(node20);
 
         assert.equal((node21 as any).$dmd!.parents.length, 1, "node21 has one parent");
         assert.equal((node21 as any).$dmd!.parents[0], node11, "node21 parent is node11");
@@ -212,7 +212,7 @@ describe('Datasets', () => {
         assert.equal(node12, (node11 as any).$next, "node 12 is next node11");
         assert.equal(node12.node2, null, "node12 sub node has been removed");
 
-        assert.equal(lastVersion(node21), node21, "node21 didn't change");
+        assert.equal(latestVersion(node21), node21, "node21 didn't change");
         assert.equal((node21 as any).$dmd!.parents.length, 0, "node21 has no parents any more");
     });
 
@@ -224,7 +224,7 @@ describe('Datasets', () => {
         node20.value = "v2";
         node30.value = "v3";
 
-        let node11 = await mutationComplete(node10), node21 = lastVersion(node20), node31 = lastVersion(node30);
+        let node11 = await mutationComplete(node10), node21 = latestVersion(node20), node31 = latestVersion(node30);
         assert.equal((node21 as any).$dmd!.parents.length, 1, "node21 has one parent");
         assert.equal((node21 as any).$dmd!.parents[0], node11, "node21 parent is node11");
         assert.equal((node31 as any).$dmd!.parents.length, 0, "node31 has no parents");
@@ -246,7 +246,7 @@ describe('Datasets', () => {
         node20.value = "v2";
         node30.value = "v3";
 
-        let node11 = await mutationComplete(node10), node21 = lastVersion(node20), node31 = lastVersion(node30);
+        let node11 = await mutationComplete(node10), node21 = latestVersion(node20), node31 = latestVersion(node30);
         assert.equal((node21 as any).$dmd!.parents.length, 1, "node21 has one parent");
         assert.equal((node21 as any).$dmd!.parents[0], node11, "node21 parent is node11");
         assert.equal((node31 as any).$dmd!.parents.length, 0, "node31 has no parents");
@@ -254,7 +254,7 @@ describe('Datasets', () => {
         node31.value = "v3bis";
         node11.node = node31;
 
-        let node12 = await mutationComplete(node11), node32 = lastVersion(node30);
+        let node12 = await mutationComplete(node11), node32 = latestVersion(node30);
 
         assert.equal((node21 as any).$dmd!.parents.length, 0, "node21 has no parents anymore");
         assert.equal((node32 as any).$dmd!.parents.length, 1, "node32 has one parent");
@@ -320,7 +320,7 @@ describe('Datasets', () => {
         assert.equal(node13.node2!.value, "v4", "node2 value v4");
 
         node13.node2 = null;
-        let node14 = await mutationComplete(node13), node24 = lastVersion(node20);
+        let node14 = await mutationComplete(node13), node24 = latestVersion(node20);
         assert.equal((node24 as any).$dmd.parents.length, 0, "node24 parent list is now empty");
         assert.equal(node24.value, "v4", "node24 value is v4");
     });

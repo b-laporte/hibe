@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { TestNode, ArrTestNode } from "./testnodes";
 import * as tn from "./testnodes";
-import { isMutating, mutationComplete, lastVersion, hList } from '../hibe';
+import { isMutating, mutationComplete, latestVersion, hList } from '../hibe';
 
 describe('Computed props', () => {
 
@@ -47,7 +47,7 @@ describe('Computed props', () => {
         assert.equal(atn.listLength, 1, "listLength is 1 (7)");
         assert.equal(tn.processLengthCounter, initCount + 7, "processor called 7 times as list has not changed");
 
-        lastVersion(ls).push(new TestNode());
+        latestVersion(ls).push(new TestNode());
         atn = <ArrTestNode>await mutationComplete(atn);
         assert.equal(atn.listLength, 2, "listLength is 2");
         assert.equal(tn.processLengthCounter, initCount + 8, "processor called 8 times as list has changed");
