@@ -25,9 +25,8 @@
     "test": "yarn run build && yarn run mocha",
     "build-hive": "yarn run clean && rollup -c rollup.config.js"
   },
-  "license": "Apache v2.0",
-  "private": true,
-  "bugs": {},
+  "license": "Apache-2.0",
+    "bugs": {},
   "devDependencies": {
     "rollup": "^0.61.2",
     "rollup-watch": "^4.3.1",
