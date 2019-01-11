@@ -1,6 +1,6 @@
 {
   "name": "hibe",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Lightweight data framework implementing eventual immutability paradigm",
   "keywords": [
     "datastore",
@@ -31,7 +31,7 @@
     "test": "yarn run build-test && yarn run mocha",
     "build-hive": "yarn run clean && rollup -c rollup.config.js",
     "prepare": "yarn run build",
-    "prepublishOnly": "yarn run test",
+    "prepublishOnly": "yarn run test && yarn run build",
     "postversion": "git push && git push --tags"
   },
   "license": "Apache-2.0",

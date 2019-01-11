@@ -149,23 +149,24 @@ export class TodoApp {
 
 ## Using hibe
 
-- in a typescript environment: copy the hibe.ts file in your project
-- in a JS environment: generate the hibe.js file (cf. below) and include it in your project
-Note: a packaged version of hibe will be published on npm in the coming months.
+Hibe can be installed from npm:
+````bash
+npm i hibe
+````
 
 ## Compiling hibe on your machine
 
 Simply install [yarn](https://yarnpkg.com/) - then run
-```bash
+````bash
 yarn install
 yarn build-hive
-```
+````
 This will generate a hibe.js in a dist folder.
 
 To run tests:
-```bash
+````bash
 yarn test
-```
+````
 
 ## License
 
