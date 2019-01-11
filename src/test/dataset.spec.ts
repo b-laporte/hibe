@@ -1,7 +1,7 @@
 
 import * as assert from 'assert';
-import { TestNode, SimpleNode, SubTestNode, DsCustom, InitNode } from "./testnodes";
-import { isMutating, mutationComplete, isImmutable, latestVersion, create, isDataset, hList, hDictionary } from '../hibe';
+import { TestNode, SubTestNode, DsCustom, InitNode, SimpleNode, TestList } from "./testnodes";
+import { isMutating, mutationComplete, latestVersion, isImmutable, isDataset, list, map, load } from '../hibe';
 
 describe('Datasets', () => {
 
@@ -9,7 +9,7 @@ describe('Datasets', () => {
         let nd = new TestNode();
         assert.equal(nd['$$value'], "v1", "v1 init value string");
         assert.equal(nd['$$node'], undefined, "node is undefined");
-        assert.equal(nd['$$node2'], null, "null init node2");
+        assert.equal(nd['$$node2'], undefined, "null init node2");
         assert.equal(isMutating(nd), false, "not mutating after creation");
     });
 
@@ -52,9 +52,9 @@ describe('Datasets', () => {
         assert.equal(isDataset({}), false, "js object is not a dataset");
         assert.equal(isDataset(true), false, "true is not a dataset");
         assert.equal(isDataset(undefined), false, "undefined is not a dataset");
-        let ls = hList(String)();
+        let ls = list(String);
         assert.equal(isDataset(ls), true, "HList is a dataset");
-        let d = hDictionary(String)();
+        let d = map(String);
         assert.equal(isDataset(d), true, "HDictionary is a dataset");
     });
 
@@ -332,7 +332,7 @@ describe('Datasets', () => {
         assert.equal(sn.node!.value, "v1", "sn.node has been properly created");
         assert.equal(sn.list.length, 0, "sn.list is an empty list");
 
-        sn = create(SimpleNode, {});
+        sn = load({}, SimpleNode);
         assert.equal(sn.node!.value, "v1", "sn.node has been properly created from empty json");
         assert.equal(sn.list.length, 0, "sn.list is has been created as an empty list from empty json");
     });
@@ -369,7 +369,7 @@ describe('Datasets', () => {
 
         let nd2 = nd["$new"](true);
         assert.equal(isMutating(nd2), false, "nd2 not mutating");
-        assert.equal(nd2.quantity, 0, "quantity not initialized through init");
+        assert.equal(nd2.quantity, undefined, "quantity not initialized through init");
     });
 
     it("should mutate a new object when init sets a changed object", async function () {

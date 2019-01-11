@@ -1,53 +1,43 @@
 import * as assert from 'assert';
-import { TestNode, StNode, defaultObject, initNewArrTestNode, DictTestNode } from "./testnodes";
-import { isMutating, mutationComplete, convert2JS, JSConversionContext, create } from '../hibe';
+import { TestNode, defaultObject, initNewArrTestNode, DictTestNode, ValueNode } from "./testnodes";
+import { isMutating, mutationComplete, convert, JSConversionContext, load } from '../hibe';
 
-describe('Convert2JS', () => {
+describe('Convert', () => {
 
-    it("should support default conversion for simple type properties", async function () {
-        let sn = new StNode();
+    it("should ignore undefined properties", async function () {
+        let sn = new ValueNode();
 
-        assert.deepEqual(convert2JS(sn), {
+        assert.deepEqual(convert(sn), {
             isOK: true,
-            isOK2: false,
             message: "hello",
-            message2: "",
             quantity: 42,
-            quantity2: 0,
-            someObject: defaultObject,
-            someObject2: null
+            someObject: defaultObject
         }, "toJS works on new objects");
 
         sn.message2 = "m2";
         assert.equal(isMutating(sn), true, "sn is mutating");
-        assert.deepEqual(convert2JS(sn), {
+        assert.deepEqual(convert(sn), {
             isOK: true,
-            isOK2: false,
             message: "hello",
-            message2: "m2",
             quantity: 42,
-            quantity2: 0,
             someObject: defaultObject,
-            someObject2: null
+            message2: "m2"
         }, "toJS works on mutating objects");
 
         sn = await mutationComplete(sn);
-        assert.deepEqual(convert2JS(sn), {
+        assert.deepEqual(convert(sn), {
             isOK: true,
-            isOK2: false,
             message: "hello",
-            message2: "m2",
             quantity: 42,
-            quantity2: 0,
             someObject: defaultObject,
-            someObject2: null
+            message2: "m2"
         }, "toJS works on changed objects");
     });
 
     it("should support conversion for datanode properties", async function () {
         let tn = new TestNode();
 
-        assert.deepEqual(convert2JS(tn), {
+        assert.deepEqual(convert(tn), {
             value: "v1"
         }, "toJS works on new objects");
 
@@ -56,7 +46,7 @@ describe('Convert2JS', () => {
         assert.equal(isMutating(tn), true, "tn is mutating");
         assert.equal(tn["$toJS"], undefined, "$toJS cleaned");
 
-        assert.deepEqual(convert2JS(tn), {
+        assert.deepEqual(convert(tn), {
             value: "v1",
             node: {
                 value: "v2"
@@ -65,7 +55,7 @@ describe('Convert2JS', () => {
         assert.equal(tn["$toJS"], undefined, "$toJS cleaned 2");
 
         tn = await mutationComplete(tn);
-        assert.deepEqual(convert2JS(tn), {
+        assert.deepEqual(convert(tn), {
             value: "v1",
             node: {
                 value: "v2"
@@ -82,7 +72,7 @@ describe('Convert2JS', () => {
         tn2.node = tn3;
         tn2.node2 = tn3;
 
-        let jsNd = convert2JS(tn1);
+        let jsNd = convert(tn1);
         assert.deepEqual(jsNd, {
             value: "v1",
             node: {
@@ -100,7 +90,7 @@ describe('Convert2JS', () => {
         assert.equal(isMutating(tn1), true, "tn1 is mutating");
 
         tn1 = await mutationComplete(tn1);
-        jsNd = convert2JS(tn1);
+        jsNd = convert(tn1);
         assert.deepEqual(jsNd, {
             value: "v1",
             node: {
@@ -138,7 +128,7 @@ describe('Convert2JS', () => {
             }
         }
 
-        assert.deepEqual(convert2JS(tn1, c), {
+        assert.deepEqual(convert(tn1, c), {
             value: "v1",
             node: {
                 value: "v2",
@@ -149,7 +139,7 @@ describe('Convert2JS', () => {
         }, "conversion on mutating object");
 
         tn1 = await mutationComplete(tn1);
-        assert.deepEqual(convert2JS(tn1, c), {
+        assert.deepEqual(convert(tn1, c), {
             value: "v1",
             node: {
                 value: "v2",
@@ -179,7 +169,7 @@ describe('Convert2JS', () => {
             return undefined;
         }
 
-        assert.deepEqual(convert2JS(tn1, c), {
+        assert.deepEqual(convert(tn1, c), {
             value: "v1",
             node: {
                 value: "v2"
@@ -187,7 +177,7 @@ describe('Convert2JS', () => {
         }, "conversion on mutating object");
 
         tn1 = await mutationComplete(tn1);
-        assert.deepEqual(convert2JS(tn1, c), {
+        assert.deepEqual(convert(tn1, c), {
             value: "v1",
             node: {
                 value: "v2"
@@ -195,7 +185,7 @@ describe('Convert2JS', () => {
         }, "conversion on mutating object");
     });
 
-    it("should ignore be able to set a node undefined through custom converters", async function () {
+    it("should be able to ignore a node through custom converters", async function () {
         let tn1 = new TestNode(), tn2 = new TestNode(), tn3 = new TestNode();
         tn2.value = "v2";
         tn3.value = "v3";
@@ -214,22 +204,18 @@ describe('Convert2JS', () => {
             return undefined;
         }
 
-        assert.deepEqual(convert2JS(tn1, c), {
+        assert.deepEqual(convert(tn1, c), {
             value: "v1",
             node: {
-                value: "v2",
-                node: undefined,
-                node2: undefined
+                value: "v2"
             }
         }, "conversion on mutating object");
 
         tn1 = await mutationComplete(tn1);
-        assert.deepEqual(convert2JS(tn1, c), {
+        assert.deepEqual(convert(tn1, c), {
             value: "v1",
             node: {
-                value: "v2",
-                node: undefined,
-                node2: undefined
+                value: "v2"
             }
         }, "conversion on changed object");
     });
@@ -237,31 +223,35 @@ describe('Convert2JS', () => {
     it("should convert lists", async function () {
         let nd = initNewArrTestNode();
 
-        assert.deepEqual(convert2JS(nd), {
+        assert.deepEqual(convert(nd), {
             name: "no name",
             list: [{ value: "i1" }, { value: "i2" }, { value: "i3" }]
         }, "conversion on mutating object");
 
         nd = await mutationComplete(nd);
-        assert.deepEqual(convert2JS(nd), {
+        assert.deepEqual(convert(nd), {
             name: "no name",
             list: [{ value: "i1" }, { value: "i2" }, { value: "i3" }]
         }, "conversion on changed object");
 
     });
 
-    it("should convert dictionaries", async function () {
-        let d = new DictTestNode();
-        d.dict.newItem("a").value = "item A";
-        d.dict.newItem("b").value = "item B";
+    it("should convert maps", async function () {
+        let d = new DictTestNode(), item: TestNode;
+        item = new TestNode();
+        item.value = "item A";
+        d.dict.set("a", item);
+        item = new TestNode();
+        item.value = "item B";
+        d.dict.set("b", item);
 
-        assert.deepEqual(convert2JS(d), {
+        assert.deepEqual(convert(d), {
             name: "map",
             dict: { a: { value: "item A" }, b: { value: "item B" } }
         }, "conversion on mutating object");
 
         d = await mutationComplete(d);
-        assert.deepEqual(convert2JS(d), {
+        assert.deepEqual(convert(d), {
             name: "map",
             dict: { a: { value: "item A" }, b: { value: "item B" } }
         }, "conversion on changed object");
@@ -269,16 +259,16 @@ describe('Convert2JS', () => {
 
     it("should return parts of original json when created through create", async function () {
         let json = { value: "v2", node: { value: "v3", node: { value: "v4" } } },
-            tn = create(TestNode, json), tjs:any;
+            tn = load(json, TestNode), tjs: any;
 
         assert.equal(isMutating(tn), false, "tn is not mutating");
-        tjs = convert2JS(tn)
+        tjs = convert(tn)
         assert.deepEqual(tjs, json, "tjs is equal to json");
         assert.strictEqual(tjs.node, json.node, "tjs.node is identical to json.node");
 
         tn.value = "v3";
         assert.equal(isMutating(tn), true, "tn is now mutating");
-        assert.deepEqual(convert2JS(tn), {
+        assert.deepEqual(convert(tn), {
             value: "v3",
             node: json.node
         }, "tjs is equal to json");
@@ -287,7 +277,7 @@ describe('Convert2JS', () => {
         tn.node = new TestNode();
         tn.node.value = "v4";
 
-        tjs = convert2JS(tn);
+        tjs = convert(tn);
         assert.deepEqual(tjs, {
             value: "v3",
             node: {
@@ -298,7 +288,7 @@ describe('Convert2JS', () => {
         let tn2 = await mutationComplete(tn);
         assert.equal(tn2 !== tn, true, "tn2 is not tn");
         assert.equal(isMutating(tn2), false, "tn2 is not mutating");
-        assert.deepEqual(convert2JS(tn2), {
+        assert.deepEqual(convert(tn2), {
             value: "v3",
             node: {
                 value: "v4"

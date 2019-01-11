@@ -1,23 +1,23 @@
 import * as assert from 'assert';
-import { SimpleNode, StNode, defaultObject } from "./testnodes";
+import { ValueNode, defaultObject, SimpleNode } from "./testnodes";
 import { isMutating, mutationComplete } from '../hibe';
 
 describe('simple types', () => {
     
     it("should support default value override for simple type properties", function () {
-        let nd = new StNode();
+        let nd = new ValueNode();
         assert.equal(nd.isOK, true, "boolean override");
         assert.equal(nd.message, "hello", "string override");
         assert.equal(nd.quantity, 42, "number override");
         assert.equal(nd.someObject, defaultObject, "object override");
 
-        assert.equal(nd.isOK2, false, "boolean default");
-        assert.equal(nd.message2, "", "string default");
-        assert.equal(nd.quantity2, 0, "number default");
-        assert.equal(nd.someObject2, null, "object default");
+        assert.equal(nd.isOK2, undefined, "boolean default");
+        assert.equal(nd.message2, undefined, "string default");
+        assert.equal(nd.quantity2, undefined, "number default");
+        assert.equal(nd.someObject2, undefined, "object default");
     });
 
-    it("should accept any kind of object for @object", async function () {
+    it("should accept any kind of object for @value", async function () {
         let nd = new SimpleNode();
 
         nd.data = { a: "property A", b: 123 };

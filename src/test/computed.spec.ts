@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { TestNode, ArrTestNode } from "./testnodes";
 import * as tn from "./testnodes";
-import { isMutating, mutationComplete, latestVersion, hList } from '../hibe';
+import { isMutating, mutationComplete, latestVersion, list } from '../hibe';
 
 describe('Computed props', () => {
 
@@ -15,7 +15,7 @@ describe('Computed props', () => {
         assert.equal(atn.listLength, 0, "listLength is 0 by default 2");
         assert.equal(tn.processLengthCounter, initCount + 1, "processor still called once");
 
-        let ls = atn.list = hList(TestNode)();
+        let ls = atn.list = list(TestNode);
         // list prop changed
         assert.equal(atn.listLength, 0, "listLength is 0 by default 3");
         assert.equal(tn.processLengthCounter, initCount + 2, "processor called twice");
@@ -37,7 +37,7 @@ describe('Computed props', () => {
         assert.equal(atn.listLength, 1, "listLength is 1 (4)");
         assert.equal(tn.processLengthCounter, initCount + 5, "processor called 5 times as list has not changed");
 
-        atn.list.get(0)!.value = "v2";
+        atn.list[0]!.value = "v2";
         assert.equal(atn.listLength, 1, "listLength is 1 (5)");
         assert.equal(tn.processLengthCounter, initCount + 6, "processor called 6 times as list is mutating");
 

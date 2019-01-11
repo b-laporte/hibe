@@ -1,22 +1,22 @@
 
-import { Dataset, List, string, boolean, dataset, hList, computed } from '../../hibe';
+import { Dataset, computed, value, datalist } from '../../hibe';
 
-@Dataset
+@Dataset()
 export class Todo {
-    @string() description;
-    @boolean() completed;
-    @boolean() editing;
+    @value() description = "";
+    @value() completed = false;
+    @value() editing = false;
 }
 
-@Dataset
+@Dataset()
 export class TodoApp {
-    @string() newEntry;
-    @dataset(hList(Todo)) list: List<Todo>;
-    @string() filter = "ALL"; // todo: support enum and/or "ALL" | "ACTIVE" | "COMPLETED" 
+    @value() newEntry = "";
+    @datalist(Todo) list: Todo[];
+    @value() filter = "ALL"; // todo: support enum and/or "ALL" | "ACTIVE" | "COMPLETED" 
 
     @computed() get listView(): Todo[] {
         if (this.filter === "ALL") {
-            return this.list.toArray();
+            return this.list;
         } else {
             let isComplete = (this.filter === "COMPLETED");
             return this.list.filter(item => item.completed === isComplete);
@@ -53,7 +53,7 @@ export function deleteTodo(app: TodoApp, todo: Todo) {
 }
 
 export function clearCompleted(app: TodoApp) {
-    app.list.filterItems((todo) => !todo.completed);
+    app.list = app.list.filter((todo) => !todo.completed);
 }
 
 // toggle all complete or uncompleted if all items are completed

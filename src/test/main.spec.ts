@@ -1,10 +1,12 @@
 
 import "./dataset.spec";
 import "./list.spec";
-import "./dict.spec";
-import "./computed.spec";
-import "./watch.spec";
-import "./create.spec";
+import "./map.spec";
+import "../test/computed.spec";
+import "../test/watch.spec";
 import "./simpletypes.spec";
-import "./convert2js.spec";
+import "../test/load.spec";
+import "../test/convert.spec";
+import "./proxy.spec";
+import "./log.spec";
 import "../samples/todomvc/todo.spec";

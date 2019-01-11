@@ -1,4 +1,4 @@
-import { Dataset, List, hList, string, dataset, computed, object, boolean, number, hDictionary, Dictionary } from "../hibe";
+import { Dataset, value, dataset, datalist, datamap, list, computed } from "../hibe";
 
 export let processLengthCounter = 0, defaultObject = { foo: "bar" };
 
@@ -6,44 +6,43 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
  * TestNode 
  * Definition when code generator is implemented
  */
-@Dataset
+@Dataset()
 export class TestNode {
-    @string() value = "v1";
-    @dataset(TestNode, true) node: TestNode; // a node will be automatically created at first read if none is set before
-    @dataset(TestNode) node2: TestNode | undefined | null; // node2 can be null (default value: undefined)
+    @value() value = "v1";
+    @dataset(TestNode) node: TestNode; // a TestNode will automatically be created at first get
+    @dataset(TestNode, false) node2: TestNode | null; // undefined by default (not auto created)
 }
 
 /**
- * StNode
+ * ValueNode
  * Node to test simple types and their defaults
  */
-@Dataset
-export class StNode {
-    @string() message = "hello";
-    @boolean() isOK = true;
-    @number() quantity = 42;
-    @object() someObject = defaultObject;
+@Dataset()
+export class ValueNode {
+    @value() message = "hello";
+    @value() isOK = true;
+    @value() quantity = 42;
+    @value() someObject = defaultObject;
 
-    @string() message2;
-    @boolean() isOK2;
-    @number() quantity2;
-    @object() someObject2;
+    @value() message2;
+    @value() isOK2;
+    @value() quantity2;
+    @value() someObject2;
 }
 
-@Dataset
+@Dataset()
 export class BaseTestNode {
-    @string() value = "v1";
-    @dataset(TestNode, true) node: TestNode;
+    @value() value = "v1";
+    @dataset(TestNode) node: TestNode;
 
     init() {
         this.value = "init value";
     }
 }
 
-
-@Dataset
+@Dataset()
 export class SubTestNode extends BaseTestNode {
-    @number() quantity;
+    @value() quantity;
 
     init() {
         super.init(); // could be bypassed
@@ -51,7 +50,7 @@ export class SubTestNode extends BaseTestNode {
     }
 }
 
-@Dataset
+@Dataset()
 export class InitNode {
     @dataset(TestNode) node;
 
@@ -62,11 +61,11 @@ export class InitNode {
     }
 }
 
-@Dataset
+@Dataset()
 export class DsCustom {
-    @string() value;
-    @number() quantity;
-    @object() foo;
+    @value() value;
+    @value() quantity;
+    @value() foo;
 
     init() {
         this.value = "hello";
@@ -79,10 +78,10 @@ export class DsCustom {
  * ArrTestNode 
  * Simple node to test lists
  */
-@Dataset
+@Dataset()
 export class ArrTestNode {
-    @string() name = "no name";
-    @dataset(hList(TestNode)) list: List<TestNode>;
+    @value() name = "no name";
+    @datalist(TestNode) list: (TestNode | null)[];
 
     @computed() get listLength() {
         processLengthCounter++;
@@ -91,15 +90,25 @@ export class ArrTestNode {
     }
 }
 
-@Dataset
+@Dataset()
+export class TestList {
+    @datalist(TestNode, false) list: TestNode[];
+}
+
+@Dataset()
+export class TestMap {
+    @datamap(TestNode, false) dict: Map<string, TestNode>;
+}
+
+@Dataset()
 export class DictTestNode {
-    @string() name = "map";
-    @dataset(hDictionary(TestNode)) dict: Dictionary<TestNode>;
+    @value() name = "map";
+    @datamap(TestNode) dict: Map<string, TestNode | null>;
 }
 
 export function initNewArrTestNode(): ArrTestNode {
     let node10 = new ArrTestNode(),
-        list = node10.list = hList(TestNode)(),
+        list = node10.list,
         itm = new TestNode();
 
     list.push(itm);
@@ -113,11 +122,10 @@ export function initNewArrTestNode(): ArrTestNode {
     return node10;
 }
 
-
-@Dataset
+@Dataset()
 export class SimpleNode {
     @dataset(TestNode, true) node: TestNode;    // will be automatically created
-    @dataset(hList(TestNode)) list: List<TestNode>; // will be automatically created as it is a list
-    @object() data;
-    @dataset(SimpleNode) subNode: SimpleNode | undefined; // will not be automatically created
+    @dataset(list(TestNode)) list: TestNode[]; // will be automatically created as it is a list
+    @value() data: any;
+    @dataset(SimpleNode, false) subNode: SimpleNode | undefined; // will not be automatically created
 }

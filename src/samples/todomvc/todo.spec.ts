@@ -1,6 +1,6 @@
 import { TodoApp, Todo, createTodo, toggleCompletion, deleteTodo, clearCompleted, toggleAllCompleted, setFilter, startEditing, stopEditing } from './todo';
 import * as assert from 'assert';
-import { watch, mutationComplete, isMutating } from '../../hibe';
+import { watch, mutationComplete } from '../../hibe';
 
 describe('Todo Service', () => {
 
@@ -58,9 +58,9 @@ describe('Todo Service', () => {
             ]
         }, "no change when newEntry contains blank spaces");
 
-        todoApp.newEntry = "second todo";
+        todoApp.newEntry = "second todo"; 
         createTodo(todoApp);
-        await mutationComplete(todoApp);
+        await mutationComplete(todoApp); 
         assert.deepEqual(renderedData, {
             newEntry: "", itemsLeft: 2, filter: "ALL",
             list: [

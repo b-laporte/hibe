@@ -1,12 +1,23 @@
 import * as assert from 'assert';
 import { TestNode, ArrTestNode, SimpleNode } from "./testnodes";
-import { isMutating, mutationComplete, create, isImmutable, hList, hDictionary } from '../hibe';
+import { isMutating, mutationComplete, isImmutable, load, list, map } from '../hibe';
 
-describe('Create', () => {
+describe('Load', () => {
+
+    it('should be supported with undefined data', async function () {
+        let tn = load(undefined as any, TestNode);
+        assert.equal(tn.value, "v1", "value has the right init value");
+        assert.equal(isMutating(tn), false, "tn is not mutating");
+    });
+
+    it('should be supported with null data', async function () {
+        let tn = load(null as any, TestNode);
+        assert.equal(tn.value, "v1", "value has the right init value");
+        assert.equal(isMutating(tn), false, "tn is not mutating");
+    });
 
     it('should be supported to load simple type properties on data objects', async function () {
-        let tn = create(TestNode, { value: "init value" });
-
+        let tn = load({ value: "init value" }, TestNode);
         assert.equal(tn.value, "init value", "value has the right init value");
         assert.equal(isMutating(tn), false, "tn is not mutating");
 
@@ -16,7 +27,7 @@ describe('Create', () => {
     });
 
     it('should be supported to load data node properties on data objects', async function () {
-        let tn = create(TestNode, { value: "v2", node: { value: "v3", node: { value: "v4" } } });
+        let tn = load({ value: "v2", node: { value: "v3", node: { value: "v4" } } }, TestNode);
         assert.equal(tn.value, "v2", "value has the right init value");
         assert.equal(tn.node!.value, "v3", "tn.node.value has the right init value");
         assert.equal(tn.node!.node!.value, "v4", "tn.node.node.value has the right init value");
@@ -28,7 +39,7 @@ describe('Create', () => {
 
     it('should remove link with $json object when all dn properties have been read', async function () {
         let json = { value: "v2", node: { value: "v3", node: { value: "v4" } } },
-            tn = create(TestNode, json);
+            tn = load(json, TestNode);
 
         assert.equal((tn as any).$json.data, json, "json not fully read (1)");
         assert.equal(tn.node!.value, "v3", "tn.node.value has the right init value");
@@ -42,7 +53,7 @@ describe('Create', () => {
 
     it('should not recreate a dataset that has been removed', async function () {
         let json = { value: "v2", node: { value: "v3", node: { value: "v4" } } },
-            tn = create(TestNode, json);
+            tn = load(json, TestNode);
 
         assert.equal(tn.node!.value, "v3", "tn.node.value has the right init value");
         assert.equal(tn.node2, undefined, "node2 is undefined as it has not been set");
@@ -57,7 +68,7 @@ describe('Create', () => {
 
     it('should support null or undefined in the json data', async function () {
         let json = { value: "v2", node: null, node2: undefined },
-            tn = create(TestNode, json);
+            tn = load(json, TestNode);
 
         assert.equal(tn.node.value, "v1", "node has been automatically created as data is null");
         assert.equal(tn.node2, undefined, "node2 is undefined as it has not been set");
@@ -65,7 +76,7 @@ describe('Create', () => {
 
     it('should property pass the $json reference to the new data node version', async function () {
         let json = { value: "v2", node: { value: "v3", node: { value: "v4" } }, node2: { value: "v5" } },
-            tn = create(TestNode, json);
+            tn = load(json, TestNode);
 
         // WARNING: debugger will call getter function and will reset the $json object!!!
         assert.equal((<any>tn).$json.data, json, "tn json is defined");
@@ -96,7 +107,7 @@ describe('Create', () => {
     });
 
     it('should support creating list from json arrays - length', async function () {
-        let json, l = create(hList(TestNode), json = [{ value: "a" }, null, { value: "c" }]);
+        let json, l = load(json = [{ value: "a" }, null, { value: "c" }], list(TestNode));
 
         assert.equal(l["$json"].data, json, "list $json has been properly initialized");
         assert.equal(l.length, 3, "correct length");
@@ -104,75 +115,75 @@ describe('Create', () => {
     });
 
     it('should support creating list from json arrays - get', async function () {
-        let l = create(hList(TestNode), [{ value: "a" }, null, { value: "c" }]);
+        let l = load([{ value: "a" }, null, { value: "c" }], list(TestNode));
 
-        assert.equal(l.get(0)!.value, "a", "item 0 value is a");
-        assert.equal(l.get(1), null, "item 1 is null");
-        assert.equal(l.get(2)!.value, "c", "item 2 value is c");
+        assert.equal(l[0]!.value, "a", "item 0 value is a");
+        assert.equal(l[1], null, "item 1 is null");
+        assert.equal(l[2]!.value, "c", "item 2 value is c");
         assert.equal(isMutating(l), false, "list is not mutating");
     });
 
     it('should support creating list from json arrays - set new', async function () {
-        let l = create(hList(TestNode), [{ value: "a" }, null, { value: "c" }]);
+        let l = load([{ value: "a" }, null, { value: "c" }], list(TestNode));
 
-        l.newItem(3);
+        l.$newItem(3);
         assert.equal(l.length, 4, "length is 4");
         assert.equal(isMutating(l), true, "l is mutating");
-        assert.equal(l.get(0)!.value, "a", "item 0 value is a");
-        assert.equal(l.get(1), null, "item 1 is null");
-        assert.equal(l.get(2)!.value, "c", "item 2 value is c");
-        assert.equal(l.get(3)!.value, "v1", "item 3 value is v1");
+        assert.equal(l[0]!.value, "a", "item 0 value is a");
+        assert.equal(l[1], null, "item 1 is null");
+        assert.equal(l[2]!.value, "c", "item 2 value is c");
+        assert.equal(l[3]!.value, "v1", "item 3 value is v1");
 
         l = await mutationComplete(l);
         assert.equal(l.length, 4, "length is 4");
         assert.equal(isMutating(l), false, "l is mutating");
-        assert.equal(l.get(0)!.value, "a", "item 0 value is a");
-        assert.equal(l.get(1), null, "item 1 is null");
-        assert.equal(l.get(2)!.value, "c", "item 2 value is c");
-        assert.equal(l.get(3)!.value, "v1", "item 3 value is v1");
+        assert.equal(l[0]!.value, "a", "item 0 value is a");
+        assert.equal(l[1], null, "item 1 is null");
+        assert.equal(l[2]!.value, "c", "item 2 value is c");
+        assert.equal(l[3]!.value, "v1", "item 3 value is v1");
     });
 
     it('should support creating list from json arrays - set existing', async function () {
-        let l = create(hList(TestNode), [{ value: "a" }, null, { value: "c" }]);
+        let l = load([{ value: "a" }, null, { value: "c" }], list(TestNode));
 
-        l.newItem(0);
+        l.$newItem(0);
         assert.equal(l.length, 3, "length is 3");
         assert.equal(isMutating(l), true, "l is mutating");
-        assert.equal(l.get(0)!.value, "v1", "item 0 value is v1");
-        assert.equal(l.get(1), null, "item 1 is null");
-        assert.equal(l.get(2)!.value, "c", "item 2 value is c");
+        assert.equal(l[0]!.value, "v1", "item 0 value is v1");
+        assert.equal(l[1], null, "item 1 is null");
+        assert.equal(l[2]!.value, "c", "item 2 value is c");
 
         l = await mutationComplete(l);
         assert.equal(l.length, 3, "length is 3");
         assert.equal(isMutating(l), false, "l is mutating");
-        assert.equal(l.get(0)!.value, "v1", "item 0 value is v1");
-        assert.equal(l.get(1), null, "item 1 is null");
-        assert.equal(l.get(2)!.value, "c", "item 2 value is c");
+        assert.equal(l[0]!.value, "v1", "item 0 value is v1");
+        assert.equal(l[1], null, "item 1 is null");
+        assert.equal(l[2]!.value, "c", "item 2 value is c");
     });
 
     it('should support creating list of strings from json arrays - set existing', async function () {
-        let l = create(hList(String), ["a", "b", null, "c", undefined, "d"]);
+        let l = load(["a", "b", null, "c", undefined, "d"], list(String));
 
         assert.equal(l.length, 6, "length is 6");
-        assert.equal(l.get(0), "a", "0 is a");
-        assert.equal(l.get(1), "b", "1 is b");
-        assert.equal(l.get(2), null, "2 is null");
-        assert.equal(l.get(3), "c", "3 is c");
-        assert.equal(l.get(4), null, "4 is null");
-        assert.equal(l.get(5), "d", "5 is d");
+        assert.equal(l[0], "a", "0 is a");
+        assert.equal(l[1], "b", "1 is b");
+        assert.equal(l[2], null, "2 is null");
+        assert.equal(l[3], "c", "3 is c");
+        assert.equal(l[4], null, "4 is null");
+        assert.equal(l[5], "d", "5 is d");
         assert.equal(isMutating(l), false, "l is not mutating");
     });
 
-    // todo: support @computed
+    // // todo: support @computed
     it('should support data list in data objects with computed properties', async function () {
-        let an = create(ArrTestNode, { name: "an123", list: [{ value: "a" }, { value: "b" }] });
+        let an = load({ name: "an123", list: [{ value: "a" }, { value: "b" }] }, ArrTestNode);
 
         assert.equal(isMutating(an), false, "an is not mutating");
         assert.equal(an.name, "an123", "an.name is correct");
 
         assert.equal(an.listLength, 2, "listLength is 2");
         assert.equal(an.list.length, 2, "list length is 2");
-        assert.equal(an.list.get(0)!.value, "a", "item 0 is a");
+        assert.equal(an.list[0]!.value, "a", "item 0 is a");
     });
 
     it('should load @object properties', async function () {
@@ -183,7 +194,7 @@ describe('Create', () => {
                 subNode: {
                     data: { a: 123, b: hello }
                 }
-            }, sn = create(SimpleNode, json);
+            }, sn = load(json, SimpleNode);
 
         let count = sn["$json"].count;
         assert.equal(sn.data.someValue, 1, "data is loaded");
@@ -197,35 +208,45 @@ describe('Create', () => {
         assert.equal(sn["$json"], undefined, "$json released");
     });
 
+    function getContent(it) {
+        let arr: any[] = [];
+        let itm = it.next();
+        while (!itm.done) {
+            arr.push(itm.value);
+            itm = it.next();
+        }
+        return arr;
+    }
+
     it('should support creating dictionaries of objects', async function () {
-        let d = create(hDictionary(TestNode), { a: { value: "a" }, c: { value: "c" } });
+        let d = load({ a: { value: "a" }, c: { value: "c" } }, map(TestNode));
 
         assert.equal(d.size, 2, "d contains 2 items");
-        assert.deepEqual(d.keys, ["a", "c"], "a and c in keys");
+        assert.deepEqual(getContent(d.keys()), ["a", "c"], "a and c in keys");
         assert.equal(isMutating(d), false, "d is not mutating");
         assert.equal(d.get("a")!.value, "a", "a node correctly created");
 
-        d.newItem("b");
+        d.set("b", new TestNode());
         assert.equal(d.size, 3, "d contains 3 items");
-        assert.deepEqual(d.keys, ["a", "c", "b"], "a, b and c in keys");
+        assert.deepEqual(getContent(d.keys()), ["a", "c", "b"], "a, b and c in keys");
         assert.equal(isMutating(d), true, "d is now mutating");
 
         d = await mutationComplete(d);
         assert.equal(d.size, 3, "d contains 3 items (2)");
-        assert.deepEqual(d.keys, ["a", "c", "b"], "a, b and c in keys (2)");
+        assert.deepEqual(getContent(d.keys()), ["a", "c", "b"], "a, b and c in keys (2)");
         assert.equal(isMutating(d), false, "d is no more mutating");
     });
 
     it('should support creating dictionaries of numbers', async function () {
-        let d = create(hDictionary(Number), { a: 1, c: 3, d: 4 });
+        let d = load({ a: 1, c: 3, d: 4 }, map(Number));
 
         assert.equal(d.size, 3, "d contains 3 items");
-        assert.deepEqual(d.keys, ["a", "c", "d"], "a, c and d in keys");
+        assert.deepEqual(getContent(d.keys()), ["a", "c", "d"], "a, c and d in keys");
         assert.equal(d.get("a"), 1, "a contains 1");
 
-        d.newItem("b");
+        d.set("b", 0);
         assert.equal(d.size, 4, "d contains 4 items");
-        assert.equal(d.get("b"), 0 , "0 in b");
+        assert.equal(d.get("b"), 0, "0 in b");
 
         d = await mutationComplete(d);
         assert.equal(d.size, 4, "d contains 4 items (2)");
