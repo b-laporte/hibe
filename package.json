@@ -1,6 +1,6 @@
 {
   "name": "hibe",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Lightweight data framework implementing eventual immutability paradigm",
   "keywords": [
     "datastore",
@@ -21,37 +21,27 @@
   "homepage": "https://github.com/b-laporte/hibe.git#readme",
   "main": "dist/hibe.js",
   "types": "dist/hibe.d.ts",
-  "rollup-plugin-main": "dist/rollup-plugin-hibe.js",
   "author": "Bertrand Laporte",
   "scripts": {
     "clean": "rm -rf dist/",
-    "build-test": "yarn run clean && rollup -c rollup.test.config.js",
     "build": "yarn run clean && tsc",
-    "mocha": "mocha dist/test.js --reporter dot",
-    "test": "yarn run build-test && yarn run mocha",
-    "build-hive": "yarn run clean && rollup -c rollup.config.js",
     "prepare": "yarn run build",
-    "prepublishOnly": "yarn run test && yarn run build",
-    "postversion": "git push && git push --tags"
+    "prepublishOnly": "yarn run test",
+    "postversion": "git push && git push --tags",
+    "test": "yarn run build && yarn run mocha -r ts-node/register src/**/*.spec.ts --reporter dot"
   },
   "license": "Apache-2.0",
   "bugs": {},
   "devDependencies": {
-    "rollup": "^0.61.2",
-    "rollup-watch": "^4.3.1",
-    "rollup-plugin-typescript2": "^0.15.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-uglify": "^4.0.0",
-    "rollup-plugin-minify-es": "^1.1.1",
-    "rollup-plugin-gzip": "^1.3.0",
-    "uglify-es": "^3.3.9",
     "typescript": ">=2.9.2",
     "mocha": "^5.2.0",
     "@types/node": "^10.3.5",
-    "@types/mocha": "^5.2.3"
+    "@types/mocha": "^5.2.3",
+    "ts-node": "^7.0.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "tslib": "^1.9.3"
+  },
   "engines": {
     "node": ">=10.3.5"
   }
