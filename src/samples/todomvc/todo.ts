@@ -1,15 +1,13 @@
 
-import { Dataset, computed, value, datalist } from '../../hibe';
+import { Data, computed, value, datalist } from '../../hibe';
 
-@Dataset()
-export class Todo {
+@Data() export class Todo {
     @value() description = "";
     @value() completed = false;
     @value() editing = false;
 }
 
-@Dataset()
-export class TodoApp {
+@Data() export class TodoApp {
     @value() newEntry = "";
     @datalist(Todo) list: Todo[];
     @value() filter = "ALL"; // todo: support enum and/or "ALL" | "ACTIVE" | "COMPLETED" 

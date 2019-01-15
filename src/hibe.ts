@@ -17,7 +17,7 @@ export function lastDatasetId() {
  * Mark dataset classes and transform them to support all necessary features
  * @param c the dataset constructor
  */
-export function Dataset() {
+export function Data() {
     return function (c: any) {
         let proto = c.prototype;
         patchIntoHObject(proto);
@@ -127,8 +127,8 @@ function trace(d: any, depth: number, out: string[], padding: string, line1: str
                     trace(value, depth - 1, out, padding + "  ", prefix + key + ": ", "", idOffset, id);
                 });
             } else {
-                traceProps(d.$stProps, id);
-                traceProps(d.$dnProps, id);
+                traceProps(d.$vProps, id);
+                traceProps(d.$dProps, id);
             }
         }
     } else if (d !== undefined && d !== null) {
@@ -214,8 +214,8 @@ export function latestVersion<T>(dataNode: T): T {
  * @param isDataNode true if the property is a datanode
  */
 function addPropertyInfo(proto: any, propName: string, isDataNode: boolean, desc: PropertyDescriptor | undefined) {
-    let nm1 = isDataNode ? "$dnProps" : "$stProps",
-        nm2 = isDataNode ? "$dnProps2" : "$stProps2";
+    let nm1 = isDataNode ? "$dProps" : "$vProps",
+        nm2 = isDataNode ? "$dProps2" : "$vProps2";
     if (!proto[nm1]) {
         proto[nm1] = [];
         proto[nm2] = [];
@@ -241,7 +241,7 @@ interface Factory<T> {
     $new(json?: Object): T;
 }
 
-export function dataset<T>(cf: Constructor<T> | Factory<T>, autoCreate = true) {
+export function data<T>(cf: Constructor<T> | Factory<T>, autoCreate = true) {
     return function (proto, key: string) {
         // proto = object prototype
         // key = the property name (e.g. "value")
@@ -256,11 +256,11 @@ export function dataset<T>(cf: Constructor<T> | Factory<T>, autoCreate = true) {
 }
 
 export function datalist<T>(cf: Constructor<T> | Factory<T>, autoCreate = true) {
-    return dataset(list(cf), autoCreate);
+    return data(list(cf), autoCreate);
 }
 
 export function datamap<K, V>(cf: Constructor<V> | Factory<V>, autoCreate = true) {
-    return dataset(map<K, V>(cf), autoCreate);
+    return data(map<K, V>(cf), autoCreate);
 }
 
 /**
@@ -370,13 +370,13 @@ function patchIntoHObject(proto: any) {
 }
 
 function $copyProps(this: HObject, obj: HObject) {
-    copyProps(this.$stProps2, this, obj);
-    copyProps(this.$dnProps2, this, obj);
+    copyProps(this.$vProps2, this, obj);
+    copyProps(this.$dProps2, this, obj);
     obj.$json = this.$json;
 }
 
 function $updatePropParentRefs(this: HObject, previousParent: HObject) {
-    let dnProps = this.$dnProps2;
+    let dnProps = this.$dProps2;
     if (dnProps) {
         let idx = dnProps.length, nm: string;
         while (idx--) {
@@ -407,10 +407,10 @@ interface DataNode {
 
 interface HObject extends DataNode {
     $json: Object;    // associated json object to support lazy-load from a json structure - only set when created from json
-    $stProps: string[] | undefined;  // e.g. ["value"] - defined at prototype level in generated code
-    $dnProps: string[] | undefined;
-    $stProps2: string[] | undefined; // e.g. ["$$value"] - defined at prototype level in generated code
-    $dnProps2: string[] | undefined;
+    $vProps: string[] | undefined;  // e.g. ["value"] - defined at prototype level in generated code
+    $dProps: string[] | undefined;
+    $vProps2: string[] | undefined; // e.g. ["$$value"] - defined at prototype level in generated code
+    $dProps2: string[] | undefined;
 
     $copyProps(obj: HObject): void;
     $updateParentRefs(previousParent: HObject): void;
@@ -820,18 +820,18 @@ function create<T>(c: Constructor<T> | Factory<T>, json?: Object): T {
 
     if (json) {
         // copy stProps from json to target if object has simple type props
-        let stProps = d.$stProps;
+        let stProps = d.$vProps;
         if (stProps) {
-            let idx = stProps.length, stProps2 = d.$stProps2;
+            let idx = stProps.length, stProps2 = d.$vProps2;
             while (idx--) {
                 d[stProps2[idx]] = json[stProps[idx]];
             }
         }
         // store json ref as $json if object supports dynamic props
-        if (d.$dnProps && d.$dnProps.length) {
+        if (d.$dProps && d.$dProps.length) {
             // the counter is used to automatically de-reference the json data when all data nodes properties
             // have been read
-            d["$json"] = { data: json, count: d.$dnProps.length };
+            d["$json"] = { data: json, count: d.$dProps.length };
         } else if (d.$acceptsJson) {
             d["$json"] = { data: json };
         }
@@ -866,10 +866,10 @@ function convertFactory() {
     let cc: JSConversionContext = {
         UNDEFINED: {},
         simpleTypeProps() {
-            return ds.$stProps || [];
+            return ds.$vProps || [];
         },
         datasetProps() {
-            return ds.$dnProps || [];
+            return ds.$dProps || [];
         },
         getPropValue(propName) {
             if (ds.$json) {

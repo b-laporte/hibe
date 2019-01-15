@@ -1,4 +1,4 @@
-import { Dataset, value, dataset, datalist, datamap, list, computed } from "../hibe";
+import { Data, value, data, datalist, datamap, list, computed } from "../hibe";
 
 export let processLengthCounter = 0, defaultObject = { foo: "bar" };
 
@@ -6,19 +6,17 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
  * TestNode 
  * Definition when code generator is implemented
  */
-@Dataset()
-export class TestNode {
+@Data() export class TestNode {
     @value() value = "v1";
-    @dataset(TestNode) node: TestNode; // a TestNode will automatically be created at first get
-    @dataset(TestNode, false) node2: TestNode | null; // undefined by default (not auto created)
+    @data(TestNode) node: TestNode; // a TestNode will automatically be created at first get
+    @data(TestNode, false) node2: TestNode | null; // undefined by default (not auto created)
 }
 
 /**
  * ValueNode
  * Node to test simple types and their defaults
  */
-@Dataset()
-export class ValueNode {
+@Data() export class ValueNode {
     @value() message = "hello";
     @value() isOK = true;
     @value() quantity = 42;
@@ -30,18 +28,16 @@ export class ValueNode {
     @value() someObject2;
 }
 
-@Dataset()
-export class BaseTestNode {
+@Data() export class BaseTestNode {
     @value() value = "v1";
-    @dataset(TestNode) node: TestNode;
+    @data(TestNode) node: TestNode;
 
     init() {
         this.value = "init value";
     }
 }
 
-@Dataset()
-export class SubTestNode extends BaseTestNode {
+@Data() export class SubTestNode extends BaseTestNode {
     @value() quantity;
 
     init() {
@@ -50,9 +46,8 @@ export class SubTestNode extends BaseTestNode {
     }
 }
 
-@Dataset()
-export class InitNode {
-    @dataset(TestNode) node;
+@Data() export class InitNode {
+    @data(TestNode) node;
 
     init() {
         let nd = new TestNode();
@@ -61,8 +56,7 @@ export class InitNode {
     }
 }
 
-@Dataset()
-export class DsCustom {
+@Data() export class DsCustom {
     @value() value;
     @value() quantity;
     @value() foo;
@@ -78,8 +72,7 @@ export class DsCustom {
  * ArrTestNode 
  * Simple node to test lists
  */
-@Dataset()
-export class ArrTestNode {
+@Data() export class ArrTestNode {
     @value() name = "no name";
     @datalist(TestNode) list: (TestNode | null)[];
 
@@ -90,18 +83,15 @@ export class ArrTestNode {
     }
 }
 
-@Dataset()
-export class TestList {
+@Data() export class TestList {
     @datalist(TestNode, false) list: TestNode[];
 }
 
-@Dataset()
-export class TestMap {
+@Data() export class TestMap {
     @datamap(TestNode, false) dict: Map<string, TestNode>;
 }
 
-@Dataset()
-export class DictTestNode {
+@Data() export class DictTestNode {
     @value() name = "map";
     @datamap(TestNode) dict: Map<string, TestNode | null>;
 }
@@ -122,10 +112,9 @@ export function initNewArrTestNode(): ArrTestNode {
     return node10;
 }
 
-@Dataset()
-export class SimpleNode {
-    @dataset(TestNode, true) node: TestNode;    // will be automatically created
-    @dataset(list(TestNode)) list: TestNode[]; // will be automatically created as it is a list
+@Data() export class SimpleNode {
+    @data(TestNode, true) node: TestNode;    // will be automatically created
+    @data(list(TestNode)) list: TestNode[]; // will be automatically created as it is a list
     @value() data: any;
-    @dataset(SimpleNode, false) subNode: SimpleNode | undefined; // will not be automatically created
+    @data(SimpleNode, false) subNode: SimpleNode | undefined; // will not be automatically created
 }
