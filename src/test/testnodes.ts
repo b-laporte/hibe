@@ -12,6 +12,14 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
     @data(TestNode, false) node2: TestNode | null; // undefined by default (not auto created)
 }
 
+class Counter {
+    duration: number;
+
+    constructor(d: number) {
+        this.duration = d;
+    }
+}
+
 /**
  * ValueNode
  * Node to test simple types and their defaults
@@ -21,6 +29,7 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
     isOK = true;
     quantity = 42;
     someObject = defaultObject;
+    counter = new Counter(42);
 
     @value() message2; // @value is mandatory if property is not initialized
     @value() isOK2;
@@ -115,6 +124,6 @@ export function initNewArrTestNode(): ArrTestNode {
 @Data() export class SimpleNode {
     @data(TestNode, true) node: TestNode;    // will be automatically created
     @data(list(TestNode)) list: TestNode[]; // will be automatically created as it is a list
-    data:any = null;
+    data: any = null;
     @data(SimpleNode, false) subNode: SimpleNode | undefined; // will not be automatically created
 }

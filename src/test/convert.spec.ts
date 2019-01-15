@@ -11,7 +11,8 @@ describe('Convert', () => {
             isOK: true,
             message: "hello",
             quantity: 42,
-            someObject: defaultObject
+            someObject: defaultObject,
+            counter: { duration: 42 }
         }, "toJS works on new objects");
 
         sn.message2 = "m2";
@@ -21,7 +22,8 @@ describe('Convert', () => {
             message: "hello",
             quantity: 42,
             someObject: defaultObject,
-            message2: "m2"
+            message2: "m2",
+            counter: { duration: 42 }
         }, "toJS works on mutating objects");
 
         sn = await mutationComplete(sn);
@@ -30,7 +32,8 @@ describe('Convert', () => {
             message: "hello",
             quantity: 42,
             someObject: defaultObject,
-            message2: "m2"
+            message2: "m2",
+            counter: { duration: 42 }
         }, "toJS works on changed objects");
     });
 
