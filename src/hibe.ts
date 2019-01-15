@@ -1,3 +1,5 @@
+'use strict';
+
 const DATASET = "DATASET";
 let ID_COUNT = 1, MAX_ITERATION = 10000, RX_INT = /^\d+$/, RX_H_PROP = /^\$/;
 let NEW_MODE = false, COPY_MODE = false; // global variable to bypass the setters during constructor call
@@ -19,7 +21,7 @@ export function lastDatasetId() {
  */
 export function Data() {
     return function (c: any) {
-        let proto = c.prototype;
+        let proto = c.prototype, firstRun = true;
         patchIntoHObject(proto);
 
         class Dataset extends c {
@@ -27,7 +29,21 @@ export function Data() {
                 let prevMode = NEW_MODE;
                 NEW_MODE = true;
                 super();
+                if (firstRun) {
+                    let v: any, m = this["$pMap"]; // property Map
+                    for (let k in this) {
+                        if (k && this.hasOwnProperty(k) && k[0] !== "$" && (!m || !m[k])) {
+                            v = this[k];
+                            delete this[k]; // remove value from current object (would hide the prototype)
+                            setValuePropInfo(proto, k); // set getters and setters on the prototype
+                            this[k] = v; // call the setter with the initial value
+                        }
+                    }
+                    Object.seal(proto);
+                    firstRun = false;
+                }
                 this.$id = dsId();
+                this.$initMode = false;
                 if (!COPY_MODE && this.init) {
                     this.$initMode = true;
                     this.init();
@@ -219,6 +235,7 @@ function addPropertyInfo(proto: any, propName: string, isDataNode: boolean, desc
     if (!proto[nm1]) {
         proto[nm1] = [];
         proto[nm2] = [];
+        proto["$pMap"] = {}; // property map
     } else if (!proto.hasOwnProperty(nm1)) {
         // we are in a sub-class of a dataset -> copy the proto arrays
         proto[nm1] = proto[nm1].slice(0);
@@ -226,6 +243,7 @@ function addPropertyInfo(proto: any, propName: string, isDataNode: boolean, desc
     }
     proto[nm1].push(propName);
     proto[nm2].push("$$" + propName);
+    proto["$pMap"][propName] = 1;
     // proto["$$" + propName] = defaultValue;
     if (desc && delete proto[propName]) {
         Object.defineProperty(proto, propName, desc);
@@ -267,17 +285,19 @@ export function datamap<K, V>(cf: Constructor<V> | Factory<V>, autoCreate = true
  * Simple type property decorator factory
  */
 export function value() {
-    return function (proto, key: string) {
-        // proto = object prototype
-        // key = the property name (e.g. "value")
-        let $$key = "$$" + key;
-        addPropertyInfo(proto, key, false, {
-            get: function () { return $get(<any>this, $$key, key); },
-            set: function (v) { $set(<any>this, $$key, v); },
-            enumerable: true,
-            configurable: true
-        });
-    };
+    return setValuePropInfo;
+}
+
+function setValuePropInfo(proto, key: string) {
+    // proto = object prototype
+    // key = the property name (e.g. "value")
+    let $$key = "$$" + key;
+    addPropertyInfo(proto, key, false, {
+        get: function () { return $get(<any>this, $$key, key); },
+        set: function (v) { $set(<any>this, $$key, v); },
+        enumerable: true,
+        configurable: true
+    });
 }
 
 /**

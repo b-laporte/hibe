@@ -2,15 +2,15 @@
 import { Data, computed, value, datalist } from '../../hibe';
 
 @Data() export class Todo {
-    @value() description = "";
-    @value() completed = false;
-    @value() editing = false;
+    description = "";
+    completed = false;
+    editing = false;
 }
 
 @Data() export class TodoApp {
-    @value() newEntry = "";
+    newEntry = "";
+    filter = "ALL"; // todo: support enum and/or "ALL" | "ACTIVE" | "COMPLETED" 
     @datalist(Todo) list: Todo[];
-    @value() filter = "ALL"; // todo: support enum and/or "ALL" | "ACTIVE" | "COMPLETED" 
 
     @computed() get listView(): Todo[] {
         if (this.filter === "ALL") {

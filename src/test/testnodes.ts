@@ -7,7 +7,7 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
  * Definition when code generator is implemented
  */
 @Data() export class TestNode {
-    @value() value = "v1";
+    value = "v1";
     @data(TestNode) node: TestNode; // a TestNode will automatically be created at first get
     @data(TestNode, false) node2: TestNode | null; // undefined by default (not auto created)
 }
@@ -17,19 +17,19 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
  * Node to test simple types and their defaults
  */
 @Data() export class ValueNode {
-    @value() message = "hello";
-    @value() isOK = true;
-    @value() quantity = 42;
-    @value() someObject = defaultObject;
+    message = "hello";
+    isOK = true;
+    quantity = 42;
+    someObject = defaultObject;
 
-    @value() message2;
+    @value() message2; // @value is mandatory if property is not initialized
     @value() isOK2;
     @value() quantity2;
     @value() someObject2;
 }
 
 @Data() export class BaseTestNode {
-    @value() value = "v1";
+    value = "v1";
     @data(TestNode) node: TestNode;
 
     init() {
@@ -38,10 +38,10 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
 }
 
 @Data() export class SubTestNode extends BaseTestNode {
-    @value() quantity;
+    quantity = 0;
 
     init() {
-        super.init(); // could be bypassed
+        super.init(); // could be bypassed depending on application logic
         this.quantity = 42; // could be dynamic
     }
 }
@@ -73,7 +73,7 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
  * Simple node to test lists
  */
 @Data() export class ArrTestNode {
-    @value() name = "no name";
+    name = "no name";
     @datalist(TestNode) list: (TestNode | null)[];
 
     @computed() get listLength() {
@@ -92,7 +92,7 @@ export let processLengthCounter = 0, defaultObject = { foo: "bar" };
 }
 
 @Data() export class DictTestNode {
-    @value() name = "map";
+    name = "map";
     @datamap(TestNode) dict: Map<string, TestNode | null>;
 }
 
@@ -115,6 +115,6 @@ export function initNewArrTestNode(): ArrTestNode {
 @Data() export class SimpleNode {
     @data(TestNode, true) node: TestNode;    // will be automatically created
     @data(list(TestNode)) list: TestNode[]; // will be automatically created as it is a list
-    @value() data: any;
+    data:any = null;
     @data(SimpleNode, false) subNode: SimpleNode | undefined; // will not be automatically created
 }

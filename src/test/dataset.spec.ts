@@ -369,7 +369,7 @@ describe('Datasets', () => {
 
         let nd2 = nd["$new"](true);
         assert.equal(isMutating(nd2), false, "nd2 not mutating");
-        assert.equal(nd2.quantity, undefined, "quantity not initialized through init");
+        assert.equal(nd2.quantity, 0, "quantity not initialized through init");
     });
 
     it("should mutate a new object when init sets a changed object", async function () {
