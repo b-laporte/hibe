@@ -1,6 +1,6 @@
 {
   "name": "hibe",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Lightweight data framework implementing eventual immutability paradigm",
   "keywords": [
     "datastore",

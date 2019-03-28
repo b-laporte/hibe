@@ -1127,13 +1127,12 @@ class RefreshContext {
 
     /**
      * Refresh all the data nodes associated to the current context
+     * @param syncWatchers flag indicating if watch callbacks should be called synchronously (default: true)
      */
-    refresh() {
+    refresh(syncWatchers = true): number {
         let ctxt = this;
-
         if (!ctxt.first) {
-            console.error("Hibe error: refresh list should not be empty");
-            return;
+            return 0;
         }
         refreshContext = new RefreshContext();
 
@@ -1167,10 +1166,23 @@ class RefreshContext {
             console.error("Hibe error: some node could not be properly refreshed because of a circular dependency");
         }
 
-        // notify all instance watchers (generated through calls to watch(...))
-        callWatchers(instanceWatchers);
-        // notify all temporary watchers (generated through calls to processingDone(...))
-        callWatchers(tempWatchers);
+        let nbrOfCallbacks = instanceWatchers.length + tempWatchers.length;
+        if (nbrOfCallbacks) {
+            if (syncWatchers) {
+                // notify all instance watchers (generated through calls to watch(...))
+                callWatchers(instanceWatchers);
+                // notify all temporary watchers (generated through calls to processingDone(...))
+                callWatchers(tempWatchers);
+            } else {
+                // run watches in a micro task
+                Promise.resolve().then(() => {
+                    callWatchers(instanceWatchers);
+                    callWatchers(tempWatchers);
+                });
+            }
+        }
+
+        return nbrOfCallbacks;
     }
 }
 
@@ -1186,9 +1198,11 @@ function processNode(d: DataNode, instanceWatchers: DnWatcher[], tempWatchers: D
     mNext.$updateParentRefs(d);
     d = d.$next;
     if (dmd.watchers) {
+        // instanceWatchers = watchers callbacks (for all instances)
         instanceWatchers.push({ dataNode: d, cbList: dmd.watchers });
     }
     if (cbList) {
+        // tempWatchers = onFreeze callbacks (used by mutationComplete() - only 1 time)
         tempWatchers.push({ dataNode: d, cbList: cbList });
     }
 }
@@ -1198,7 +1212,7 @@ function callWatchers(watchers: DnWatcher[]) {
     for (let w of watchers) {
         cbList = w.cbList;
         for (let cb of cbList) {
-            cb(w.dataNode);
+            cb(latestVersion(w.dataNode));
         }
     }
 }
@@ -1206,6 +1220,18 @@ function callWatchers(watchers: DnWatcher[]) {
 // list of all nodes that need to be refreshed
 let refreshContext: RefreshContext = new RefreshContext(),
     refreshPool: RefreshNode[] = [];
+
+/**
+ * Synchronous refresh of all data objects that have been changed since last refresh
+ * Watchers will be called asynchronously (i.e. after this function has returned)
+ * Warning: this function must be used carefully as it can generate performance degradation when called too often
+ * In most cases await mutationComplete() should be called instead of this function as it will run in a separate micro-task, 
+ * which will limit the number of operations to the strict minimum
+ * @return the number of callbacks that are pending
+ */
+export function commitMutations() {
+    return refreshContext.refresh(false);
+}
 
 // -----------------------------------------------------------------------------------------------------------------------------
 // List classes

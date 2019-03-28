@@ -1,22 +1,17 @@
 
 # Hibe - Immutable data without pain
 
-**tl;dr** hibe is library to create immutable data objects through a 'mutable' api
+**tl;dr** hibe is a library to create immutable data objects/graphs through a 'mutable' api. Changes can be observed and objects can be serialized/de-serialized to JSON data.
 
 ## Key features
-- eventual immutability API concept (cf. below)
-- support of [Directed Acyclic Graphs][DAG]
-- actions as pure functions (cf. [TodoMVC](src/samples/todomvc/todo.ts) example)
+- immutability through mutable APIs (aka. eventual immutability - cf. below)
 - easily observable data (cf. [watch()][wiki])
-- memoized computed properties (cf. [@computed][decorators])
-- based on JS decorators (no need for any preprocessor)
-- Array and Map collections support (cf. [@datalist][collections] and [@datamap][collections])
-- possibility to store any JavaScript value or object (cf. [@value][decorators]) - only root reference will be watched
-- possibility to create datasets from a JSON structure (cf. [load()][toFromJS]) - note: load will be lazy (i.e. objects will be loaded on read)
-- possibility to convert datasets to JS objects (cf. [convert()][toFromJS])
-- mostly tree-shakeable (what you don't use will be stripped-out from your code - cf. [rollup](https://rollupjs.org/guide/en) or [webpack](https://webpack.js.org/guides/tree-shaking/))
-- easily testable (cf. [mutationComplete()][wiki])
+- to / from JSON support (cf. [load()][toFromJS] and [convert()][toFromJS])
+- support of [Directed Acyclic Graphs][DAG]
 - support of data object inheritance
+- (mostly) tree-shakeable: what you don't use will be stripped-out from your code - cf. [rollup](https://rollupjs.org/guide/en) or [webpack](https://webpack.js.org/guides/tree-shaking/)
+- easily testable (cf. [mutationComplete()][wiki])
+- memoized computed properties (cf. [@computed][decorators])
 
 [wiki]: ../../wiki
 [decorators]: ../../wiki/Decorators
@@ -33,7 +28,7 @@ Hibe has been primarily designed to work in uni-directional dataflow contexts (c
 
 </div>
 
-After a closer look we realize that there are two main sequences in this model:
+This model is composed of 2 main sequences:
 - a **read-only** sequence that occurs after state changes to trigger UI view updates. In this sequence, data should be ideally ***immutable*** as it gives a very simple way to avoid recalculating pieces that haven't changed on the UI side.
 - a (mostly)**write-only** sequence that occurs during the action processing. In this sequence, having ***mutable*** data is convenient as actions can be written through very straightforward and maintainable code.
 
@@ -43,7 +38,7 @@ Let's imagine a very simple example to concretely illustrate what it means.
 
 ```js
 // Todo data for http://todomvc.com/examples/vanillajs/
-@Dataset()
+@Data()
 export class Todo {
     @value() description = "";   // description of the todo task
     @value() completed = false;  // is the task completed?
@@ -102,16 +97,16 @@ watch(todo, (newTodo: Todo) => {
 todo = await mutationComplete(todo);
 // the new todo version is now accessible
 ```
-
+(note: for advanced cases a synchronous API is also available - cf. commitMutations())
 
 Of course, more complex ([directed acyclic][DAG]) graphs can be created:
 
 ```js
 // TodoApp structure for http://todomvc.com/examples/vanillajs/
-@Dataset
+@Data()
 export class TodoApp {
     @value() newEntry = "";
-    @datalist(Todo) list: Todo[];
+    @data(list(Todo)) list: Todo[];
     @value() filter = "ALL";
 }
 ```
@@ -120,10 +115,10 @@ Hibe objects (aka. datasets) also support ***@computed*** properties to expose v
 
 ```js
 // TodoApp structure for http://todomvc.com/examples/vanillajs/
-@Dataset
+@Data()
 export class TodoApp {
     @value() newEntry = "";
-    @datalist(Todo) list: Todo[];
+    @data(list(Todo)) list: Todo[];
     @value() filter = "ALL";
 
     // return an array of Todo sorted according to the filter property
